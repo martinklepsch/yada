@@ -21,9 +21,9 @@
 (s/def :yada.resource/authenticate fn?)
 
 (s/def :yada.resource/authentication-schemes
-  (s/+ (s/keys :req [:yada.resource/scheme
-                     :yada.resource/authenticate]
-               :opt [:yada.resource/realm])))
+  (s/+ (s/keys :req [:yada.resource/scheme]
+               :opt [:yada.resource/realm
+                     :yada.resource/authenticate])))
 
 (s/def :yada/resource
   (s/keys :req [:yada.resource/methods]

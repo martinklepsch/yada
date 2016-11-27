@@ -47,6 +47,6 @@
 
         req (-> (new-request :get "https://localhost")
                 (assoc-in [:headers "cookie"] "SID=31d4d96e407aad42"))
-        ctx (ctx/context (into {} h) req)]
+        ctx (ctx/new-context (into {:ring/request req} h))]
     (is (= {"SID" {:value "31d4d96e407aad42"}}
            (cookies/cookies ctx)))))

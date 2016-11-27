@@ -9,11 +9,11 @@
   nil)
 
 (defn ^:interceptor authenticate [ctx]
-  (assoc ctx :yada.request/authentication
-         (remove nil?
-                 (for [scheme (ctx/authentication-schemes ctx)]
-                   (some-> (authenticate-with-scheme scheme ctx)
-                           (merge
-                            {:yada.request/scheme (:yada.resource/scheme scheme)}
-                            (when (:yada.resource/realm scheme)
-                              {:yada.request/realm (:yada.resource/realm scheme)})))))))
+  (assoc-in ctx [:yada/request :yada.request/authentication]
+            (remove nil?
+                    (for [scheme (ctx/authentication-schemes ctx)]
+                      (some-> (authenticate-with-scheme scheme ctx)
+                              (merge
+                               {:yada.request/scheme (:yada.resource/scheme scheme)}
+                               (when (:yada.resource/realm scheme)
+                                 {:yada.request/realm (:yada.resource/realm scheme)})))))))

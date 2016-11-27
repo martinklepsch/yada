@@ -2,21 +2,64 @@
 
 (ns yada.jwt-test
   (:require [clojure.test :refer :all]
-            [yada.authentication :as a]
+            [clojure.spec.gen :as gen]
+            [yada.authentication :as authn]
+            [yada.authorization :as authz]
+            [yada.handler :refer [new-handler accept-request]]
+            [yada.profiles :refer [profiles]]
+            [yada.cookies :as cookies]
             [yada.resource :refer [new-resource]]
             [buddy.sign.jwt :as jwt]
-            [yada.test-util :refer [new-request]]))
+            [yada.test-util :refer [new-request]]
+            yada.jwt
+            [yada.method :as method]))
 
 (jwt/sign {:foo 1} "secret")
 
 (deftest authentication []
-  (let [res (new-resource {:yada.resource/authentication-schemes
-                           [{:yada.resource/scheme :jwt
-                             :yada.resource/realm "default"
-                             :yada.resource/authenticate (fn [ctx] ctx)}]
-                           :yada.resource/methods {"GET" {:yada.resource/response (fn [ctx] "Hi")}}})
-        ctx (a/authenticate {:yada/resource res})]
-    (is (= [{:credentials {:username "alice"},
-             :yada.request/scheme "Test",
-             :yada.request/realm "default"}]
-           (:yada.request/authentication ctx)))))
+  )
+
+
+(let [secret (gen/generate (gen/gen-for-pred string?))]
+
+  (let [response
+        @(accept-request
+          (new-handler {:yada/resource
+                        (new-resource
+                         {:yada.resource/methods
+                          {"POST"
+                           {:yada.resource/response
+                            (fn [ctx]
+                              (-> (:yada/response ctx)
+                                  (cookies/set-cookie
+                                   ctx "session"
+                                   {:yada.cookie/value (jwt/sign {:user "malcolm"} secret)})))}}})
+                        :yada.handler/interceptor-chain [method/perform-method]
+                        :yada/profile (profiles :dev)})
+          (new-request :post "http://localhost"))
+
+        cookie (first (get-in response [:headers "Set-Cookie"]))
+
+        response2
+        @(accept-request
+          (new-handler {:yada.jwt/secret secret
+                        :yada/resource
+                        (new-resource
+                         {:yada.resource/authentication-schemes
+                          [{:yada.resource/scheme :jwt
+                            ;;:yada.resource/realm "default"
+                            ;;:yada.jwt/secret secret
+                            }]
+
+                          :yada.resource/methods
+                          {"GET"
+                           {:yada.resource/response (fn [ctx]
+                                                      (println "Response from protected")
+                                                      ;; TODO: Protect with yada.authorization
+                                                      "Hi - TODO: show claims in yada.authentication")}}})
+                        :yada.handler/interceptor-chain [authn/authenticate authz/authorize method/perform-method]
+                        :yada/profile (profiles :dev)})
+          (-> (new-request :get "http://localhost")
+              (assoc-in [:headers "cookie"] cookie)))]
+
+    response2))

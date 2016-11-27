@@ -14,7 +14,8 @@
    [ring.middleware.cookies :refer [cookies-request cookies-response]])
   (:import [yada.response Response]))
 
-(s/def :yada/request (s/keys :req []))
+(s/def :yada/request (s/keys :req []
+                             :opt [:yada.request/authentication]))
 
 (defn ->ring-response [ctx]
   (let [response (:yada/response ctx)]
@@ -44,14 +45,15 @@
                 :yada/method-token
                 :yada/profile]))
 
-(defn context "Create a request context"
-  [init-ctx req]
-  (merge
-   {:ring/request req
-    :yada/response (new-response)
-    :yada/method-token (-> req :request-method name str/upper-case)
-    :yada/request {:yada.request/cookies* (delay (:cookies (cookies-request req)))}}
-   init-ctx))
+(defn new-context "Create a request context"
+  [init-ctx]
+  (let [req (:ring/request init-ctx)]
+    (merge
+     (when req
+       {:yada/method-token (-> req :request-method name str/upper-case)
+        :yada/request {:yada.request/cookies* (delay (:cookies (cookies-request req)))}})
+     {:yada/response (new-response)}
+     init-ctx)))
 
 (defn method-token [ctx]
   (-> ctx :yada/method-token))
@@ -74,3 +76,9 @@
 (defn set-body [response body]
   (assert (instance? Response response) "Response parameter is not a response record")
   (assoc-in response [:ring.response/body] body))
+
+(defn authentication [ctx]
+  (get-in ctx [:yada/request :yada.request/authentication]))
+
+(defn authenticated-claims [ctx]
+  (apply merge (map :yada.authentication/claims (authentication ctx))))

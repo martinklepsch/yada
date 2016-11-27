@@ -2,10 +2,14 @@
 
 (ns yada.jwt
   (:require [yada.authentication :as a]
-            [buddy.sign.jws :as jws]))
+            [yada.cookies :as cookies]
+            [buddy.sign.jwt :as jwt]))
 
-(jws/sign)
+(defn secret [ctx]
+  (:yada.jwt/secret ctx))
 
 (defmethod a/authenticate-with-scheme :jwt [scheme ctx]
-  {:credentials {:username "alice"
-                 :scheme scheme}})
+  {:yada.authentication/claims (some-> (cookies/cookies ctx)
+                                       (get "session")
+                                       :value
+                                       (jwt/unsign (secret ctx)))})

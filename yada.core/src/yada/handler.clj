@@ -4,6 +4,7 @@
   (:require [clojure.spec :as s]
             [clojure.spec.gen :as gen]
             [manifold.deferred :as d]
+            [yada.error :as error]
             [yada.method :refer [perform-method]]
             [yada.context :as ctx]
             [yada.spec :refer [validate]]
@@ -39,25 +40,20 @@
      (apply d/chain ctx (wrap-interceptors (concat chain [terminate]) (profile/interceptor-wrapper ctx)))
      (d/catch Exception
          (fn [e]
-           (let [error-data (when (instance? clojure.lang.ExceptionInfo e) (ex-data e))
-                 chain (or (:yada.handler/error-interceptor-chain ctx)
-                           [terminate])]
-             (->
-              (apply d/chain (cond-> ctx
-                               e (assoc :yada/error e)
-                               (:ring.response/status error-data) (assoc-in [:yada/response :ring.response/body] (get-in status [(:ring.response/status error-data) :name]))
-                               ;; TODO: We want dev errors back
-                               ;; (yada.profile/reveal-exception-messages? ctx) (assoc-in [:yada/response :ring.response/body] (.getMessage ^Exception e))
-                               error-data (update :yada/response merge error-data))
-                     chain)
-              (d/catch Exception
-                  (fn [e] ;; TODO: Error in error chain, log the original error and politely return a 500
-                    e)))))))))
+           (->
+            (apply d/chain
+                   (assoc ctx :yada/error e)
+                   (or (:yada.handler/error-interceptor-chain ctx)
+                       [error/handle-error terminate]))
+            (d/catch Exception
+                (fn [e] ;; TODO: Error in error chain, log the original error and politely return a 500
+                  (println "Error in error handling")
+                  e))))))))
 
 (defrecord Handler []
   clojure.lang.IFn
   (invoke [this req]
-    (apply-interceptors (ctx/context (into {} this) req))))
+    (apply-interceptors (ctx/new-context (into {:ring/request req} this)))))
 
 (defn new-handler [model]
   (map->Handler model))
