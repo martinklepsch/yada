@@ -64,7 +64,7 @@
    (:yada/method-token ctx)))
 
 (defn authentication-schemes [ctx]
-  (-> ctx :yada/resource :yada.resource/authentication-schemes))
+  (get-in ctx [:yada/resource :yada.resource/authentication]))
 
 (defn response [ctx]
   (:yada/response ctx))
@@ -80,5 +80,8 @@
 (defn authentication [ctx]
   (get-in ctx [:yada/request :yada.request/authentication]))
 
-(defn authenticated-claims [ctx]
+(defn claims [ctx]
   (apply merge (map :yada.authentication/claims (authentication ctx))))
+
+(defn authorization-predicate [ctx]
+  (get-in ctx [:yada/resource :yada.resource/authorized?]))

@@ -9,7 +9,11 @@
 (deftest resource-map-coercion-test
   (is (=
        {:yada.resource/methods [{:yada/method-token "GET"} {:yada/method-token "POST"}]}
-       (coerce-to-resource-map {:yada.resource/methods (array-map :get {} :post {})}))))
+       (coerce-to-resource-map {:yada.resource/methods (array-map :get {} :post {})})))
+
+  (is (=
+       {:yada.resource/authentication [{:yada.resource/scheme :foo}]}
+       (coerce-to-resource-map {:yada.resource/authentication :foo}))))
 
 (deftest generator-test
   (is

@@ -28,7 +28,7 @@
 (s/def :yada.resource/authenticate
   (s/with-gen fn? #(gen/return (fn [ctx] {}))))
 
-(s/def :yada.resource/authentication-schemes
+(s/def :yada.resource/authentication
   (s/+ (s/keys :req [:yada.resource/scheme]
                :opt [:yada.resource/realm
                      :yada.resource/authenticate])))
@@ -39,7 +39,7 @@
 
 (s/def :yada/resource
   (s/keys :req [:yada.resource/methods]
-          :opt [:yada.resource/authentication-schemes
+          :opt [:yada.resource/authentication
                 :yada.resource/authorization]))
 
 ;; Coercion
@@ -55,11 +55,27 @@
     (vector? x) (mapv coerce-method x)
     :otherwise x))
 
+(defn coerce-authentication-scheme [x]
+  (cond
+    (keyword? x) {:yada.resource/scheme x}
+    (string? x) {:yada.resource/scheme x}
+    :otherwise x))
+
+(defn coerce-authentication [x]
+  (cond
+    (keyword? x) [(coerce-authentication-scheme x)]
+    (string? x) [(coerce-authentication-scheme x)]
+    (map? x) [x]
+    (vector? x) (mapv coerce-authentication-scheme x)
+    :otherwise x))
+
 (defn coerce-to-resource-map [input]
   (postwalk
    (fn [x]
      (cond
        (matches-map-entry? :yada.resource/methods x) [:yada.resource/methods (coerce-methods (second x))]
+       (matches-map-entry? :yada.resource/authentication x)
+       [:yada.resource/authentication (coerce-authentication (second x))]
        :otherwise x))
    input))
 

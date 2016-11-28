@@ -10,7 +10,7 @@
   {:credentials {:username "alice"}})
 
 (deftest authentication []
-  (let [res (new-resource {:yada.resource/authentication-schemes
+  (let [res (new-resource {:yada.resource/authentication
                            [{:yada.resource/scheme "Test"
                              :yada.resource/realm "default"
                              :yada.resource/authenticate (fn [ctx] ctx)}]

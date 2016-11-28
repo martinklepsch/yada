@@ -4,13 +4,17 @@
   (:require [yada.context :as ctx]))
 
 (defn ^:interceptor authorize [ctx]
-  (println "standard yada authorization")
-  (let [claims (ctx/authenticated-claims ctx)]
+  (let [authz (ctx/authorization-predicate ctx)]
+    (if authz
+      (if (authz ctx)
+        ctx
+        (if (ctx/claims ctx)
+          (throw (ex-info "" {:ring.response/status 403}))
+          (throw (ex-info "" {:ring.response/status 401}))))
 
-    (if
-      (= claims {:user "malcolm"})
-      ctx ; allow to proceed
-
-      (if claims
-        (throw (ex-info "" {:ring.response/status 403}))
-        (throw (ex-info "" {:ring.response/status 401}))))))
+      ;; TODO: There is no authz function
+      ;; Should we demand one?
+      ;; If there's an authentication scheme in effect, they yes!
+      (do
+        (println "No authz predicate")
+        ctx))))

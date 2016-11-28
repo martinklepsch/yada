@@ -9,7 +9,7 @@
   (:yada.jwt/secret ctx))
 
 (defmethod a/authenticate-with-scheme :jwt [scheme ctx]
-  {:yada.authentication/claims (some-> (cookies/cookies ctx)
-                                       (get "session")
-                                       :value
-                                       (jwt/unsign (secret ctx)))})
+  (some-> (cookies/cookies ctx)
+          (get "session")
+          :value
+          (jwt/unsign (secret ctx))))

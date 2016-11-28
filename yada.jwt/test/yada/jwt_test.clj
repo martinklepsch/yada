@@ -12,7 +12,8 @@
             [buddy.sign.jwt :as jwt]
             [yada.test-util :refer [new-request]]
             yada.jwt
-            [yada.method :as method]))
+            [yada.method :as method]
+            [yada.context :as ctx]))
 
 (jwt/sign {:foo 1} "secret")
 
@@ -45,18 +46,19 @@
           (new-handler {:yada.jwt/secret secret
                         :yada/resource
                         (new-resource
-                         {:yada.resource/authentication-schemes
-                          [{:yada.resource/scheme :jwt
-                            ;;:yada.resource/realm "default"
-                            ;;:yada.jwt/secret secret
-                            }]
+                         {:yada.resource/authentication :jwt
+                          :yada.resource/authorized?
+                          (fn [ctx]
+                            (let [claims (ctx/claims ctx)]
+                              (= claims {:user "malcolm"})))
 
                           :yada.resource/methods
                           {"GET"
                            {:yada.resource/response (fn [ctx]
                                                       (println "Response from protected")
                                                       ;; TODO: Protect with yada.authorization
-                                                      "Hi - TODO: show claims in yada.authentication")}}})
+                                                      "Hi - TODO: show claims in yada.authentication")}}}
+                         )
                         :yada.handler/interceptor-chain [authn/authenticate authz/authorize method/perform-method]
                         :yada/profile (profiles :dev)})
           (-> (new-request :get "http://localhost")
