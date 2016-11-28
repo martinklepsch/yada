@@ -11,6 +11,11 @@
        {:yada.resource/methods [{:yada/method-token "GET"} {:yada/method-token "POST"}]}
        (coerce-to-resource-map {:yada.resource/methods (array-map :get {} :post {})}))))
 
+(deftest generator-test
+  (is
+   (every? (partial s/valid? :yada/resource)
+           (clojure.spec.gen/sample (s/gen :yada/resource)))))
+
 #_(s/explain-str :yada/resource {:yada.resource/authentication-schemes
                                [{:yada.resource/scheme "Basic"
                                  :yada.resource/realm "default"
