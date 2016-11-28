@@ -5,9 +5,13 @@
    [clojure.walk :refer [postwalk]]
    [clojure.string :as str]
    [clojure.spec :as s]
+   [clojure.spec.gen :as gen]
    yada.spec))
 
 ;; Specs
+
+(s/def :yada.resource/response
+  (s/with-gen fn? #(gen/return (fn [ctx] "Hello World!"))))
 
 (s/def :yada.resource/method
   (s/keys :req [:yada/method-token]
@@ -16,18 +20,27 @@
 (s/def :yada.resource/methods
   (s/+ :yada.resource/method))
 
+(s/def :yada.resource/scheme
+  (s/or :string string? :kw keyword?))
+
 (s/def :yada.resource/realm string?)
 
-(s/def :yada.resource/authenticate fn?)
+(s/def :yada.resource/authenticate
+  (s/with-gen fn? #(gen/return (fn [ctx] {}))))
 
 (s/def :yada.resource/authentication-schemes
   (s/+ (s/keys :req [:yada.resource/scheme]
                :opt [:yada.resource/realm
                      :yada.resource/authenticate])))
 
+(s/def :yada.resource/authorization
+  (s/with-gen fn?
+    #(gen/return identity)))
+
 (s/def :yada/resource
   (s/keys :req [:yada.resource/methods]
-          :opt [:yada.resource/authentication-schemes]))
+          :opt [:yada.resource/authentication-schemes
+                :yada.resource/authorization]))
 
 ;; Coercion
 
