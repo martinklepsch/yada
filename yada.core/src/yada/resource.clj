@@ -20,7 +20,7 @@
 (s/def :yada.resource/methods
   (s/+ :yada.resource/method))
 
-(s/def :yada.resource/scheme
+(s/def :yada.resource.authentication/scheme
   (s/or :string string? :kw keyword?))
 
 (s/def :yada.resource/realm string?)
@@ -29,7 +29,7 @@
   (s/with-gen fn? #(gen/return (fn [ctx] {}))))
 
 (s/def :yada.resource/authentication
-  (s/+ (s/keys :req [:yada.resource/scheme]
+  (s/+ (s/keys :req [:yada.resource.authentication/scheme]
                :opt [:yada.resource/realm
                      :yada.resource/authenticate])))
 
@@ -57,8 +57,8 @@
 
 (defn coerce-authentication-scheme [x]
   (cond
-    (keyword? x) {:yada.resource/scheme x}
-    (string? x) {:yada.resource/scheme x}
+    (keyword? x) {:yada.resource.authentication/scheme x}
+    (string? x) {:yada.resource.authentication/scheme x}
     :otherwise x))
 
 (defn coerce-authentication [x]

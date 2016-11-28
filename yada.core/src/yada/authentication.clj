@@ -3,7 +3,7 @@
 (ns yada.authentication
   (:require [yada.context :as ctx]))
 
-(defmulti authenticate-with-scheme "" (fn [scheme ctx] (:yada.resource/scheme scheme)))
+(defmulti authenticate-with-scheme "" (fn [scheme ctx] (:yada.resource.authentication/scheme scheme)))
 
 (defmethod authenticate-with-scheme :default [scheme ctx]
   nil)

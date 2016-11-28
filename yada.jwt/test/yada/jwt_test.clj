@@ -15,8 +15,6 @@
             [yada.method :as method]
             [yada.context :as ctx]))
 
-(jwt/sign {:foo 1} "secret")
-
 (deftest authentication []
   )
 
@@ -41,12 +39,12 @@
 
         cookie (first (get-in response [:headers "Set-Cookie"]))
 
-        response2
+        protected-response
         @(accept-request
-          (new-handler {:yada.jwt/secret secret
-                        :yada/resource
+          (new-handler {:yada/resource
                         (new-resource
-                         {:yada.resource/authentication :jwt
+                         {:yada.resource/authentication {:yada.resource.authentication/scheme :jwt
+                                                         :yada.jwt/secret secret}
                           :yada.resource/authorized?
                           (fn [ctx]
                             (let [claims (ctx/claims ctx)]
@@ -64,4 +62,4 @@
           (-> (new-request :get "http://localhost")
               (assoc-in [:headers "cookie"] cookie)))]
 
-    response2))
+    protected-response))
