@@ -12,7 +12,8 @@
   (assoc-in ctx [:yada/request :yada.request/authentication]
             (remove nil?
                     (for [scheme (ctx/authentication-schemes ctx)]
-                      (some-> (authenticate-with-scheme scheme ctx)
+                      (some-> {:yada.authentication/claims
+                               (authenticate-with-scheme scheme ctx)}
                               (merge
                                {:yada.request/scheme (:yada.resource/scheme scheme)}
                                (when (:yada.resource/realm scheme)

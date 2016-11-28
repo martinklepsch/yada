@@ -3,6 +3,7 @@
 (ns yada.authentication-test
   (:require [clojure.test :refer :all]
             [yada.authentication :as a]
+            [yada.context :as ctx]
             [yada.resource :refer [new-resource]]))
 
 (defmethod a/authenticate-with-scheme "Test" [scheme ctx]
@@ -10,12 +11,13 @@
 
 (deftest authentication []
   (let [res (new-resource {:yada.resource/authentication-schemes
-                       [{:yada.resource/scheme "Test"
-                         :yada.resource/realm "default"
-                         :yada.resource/authenticate (fn [ctx] ctx)}]
-                       :yada.resource/methods {"GET" {:yada.resource/response (fn [ctx] "Hi")}}})
+                           [{:yada.resource/scheme "Test"
+                             :yada.resource/realm "default"
+                             :yada.resource/authenticate (fn [ctx] ctx)}]
+                           :yada.resource/methods {"GET" {:yada.resource/response (fn [ctx] "Hi")}}})
         ctx (a/authenticate {:yada/resource res})]
-    (is (= [{:credentials {:username "alice"},
+    (is (= [{:yada.authentication/claims {:credentials {:username "alice"},
+                                          }
              :yada.request/scheme "Test",
              :yada.request/realm "default"}]
-           (:yada.request/authentication ctx)))))
+           (ctx/authentication ctx)))))
