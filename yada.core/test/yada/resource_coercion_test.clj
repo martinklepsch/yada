@@ -12,12 +12,13 @@
        (coerce-to-resource-map {:yada.resource/methods (array-map :get {} :post {})})))
 
   (is (=
-       {:yada.resource/authentication [{:yada.resource/scheme :foo}]}
+       {:yada.resource/authentication [{:yada.resource.authentication/scheme :foo}]}
        (coerce-to-resource-map {:yada.resource/authentication :foo}))))
 
 (deftest generator-test
   (is
    (every? (partial s/valid? :yada/resource)
+           ;; TODO: Use property based testing
            (clojure.spec.gen/sample (s/gen :yada/resource)))))
 
 #_(s/explain-str :yada/resource {:yada.resource/authentication-schemes

@@ -3,10 +3,11 @@
 (ns yada.response
   (:require [clojure.spec :as s]))
 
-(s/def :yada/response (s/keys :req [:ring.response/headers]
-                              :opt [:ring.response/status
-                                    :ring.response/body
-                                    :yada.response/cookies]))
+(s/def :yada/response (s/keys :req [:yada.response/headers]
+                              :opt [:yada.response/status
+                                    :yada.response/body
+                                    :yada.response/cookies
+                                    :yada.response/error]))
 
 (defrecord
     ^{:doc "This record is used as an escape mechanism users to
@@ -17,4 +18,4 @@
     Response [])
 
 (defn new-response []
-  (map->Response {:ring.response/headers {}}))
+  (map->Response {:yada.response/headers {}}))

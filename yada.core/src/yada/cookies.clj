@@ -45,6 +45,7 @@
   (deref (get-in ctx [:yada/request :yada.request/cookies*])))
 
 (defn set-cookie [response ctx nm val]
+  (assert val "Cookie value cannot be nil")
   (assert (instance? Response response) "Response parameter is not a response record")
   (when (p/validate-set-cookie? ctx)
     (validate val :yada.response/cookie "Invalid cookie value"))

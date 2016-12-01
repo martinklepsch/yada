@@ -20,10 +20,11 @@
       (let [h (new-handler (assoc h :yada/profile (:dev profiles)))
             response @(accept-request h req)]
         (is (= 500 (:status response)))
-        (is (= "Internal Server Error" (:body response)))))
+        ;; With the dev profile we are expected a more detailed error message
+        (is (not (= "500 Internal Server Error" (:body response))))))
 
     (testing "prod profile"
       (let [h (new-handler (assoc h :yada/profile (:prod profiles)))
             response @(accept-request h req)]
         (is (= 500 (:status response)))
-        (is (= "Internal Server Error" (:body response)))))))
+        (is (= "500 Internal Server Error" (:body response)))))))

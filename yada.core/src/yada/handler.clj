@@ -42,7 +42,7 @@
          (fn [e]
            (->
             (apply d/chain
-                   (assoc ctx :yada/error e)
+                   (assoc-in ctx [:yada/response :yada/error :yada.error/exception] e)
                    (or (:yada.handler/error-interceptor-chain ctx)
                        [error/handle-error terminate]))
             (d/catch Exception

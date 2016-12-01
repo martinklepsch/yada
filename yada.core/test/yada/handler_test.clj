@@ -10,6 +10,15 @@
 
 (require 'yada.methods)
 
+(let [res (new-resource {:yada.resource/methods
+                           {"GET" {:yada.resource/response (fn [ctx] "Hello World!")}}})
+        h (new-handler {:yada/resource res
+                        :yada.handler/interceptor-chain [method/perform-method]
+                        :yada/profile (profiles :dev)})
+      response @(accept-request h (new-request :get "https://localhost"))]
+  response
+  )
+
 (deftest ok
   (let [res (new-resource {:yada.resource/methods
                            {"GET" {:yada.resource/response (fn [ctx] "Hello World!")}}})

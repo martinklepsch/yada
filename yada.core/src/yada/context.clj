@@ -20,11 +20,12 @@
 (defn ->ring-response [ctx]
   (let [response (:yada/response ctx)]
     (merge
-     {:status (or (:ring.response/status response) 500)
+     {:status (or (:yada.response/status response) 500)
+      ;; TODO: Set-Cookies should be in an interceptor
       :headers (merge (when-let [cookies (:yada.response/cookies response)]
                         (yada.cookies/->headers cookies))
-                      (or (:ring.response/headers response) {}))}
-     (when-let [body (:ring.response/body response)]
+                      (or (:yada.response/headers response) {}))}
+     (when-let [body (:yada.response/body response)]
        {:body body})
      )))
 
@@ -85,3 +86,6 @@
 
 (defn authorization-predicate [ctx]
   (get-in ctx [:yada/resource :yada.resource/authorized?]))
+
+(defn error [ctx]
+  (get-in ctx [:yada/response :yada/error]))
