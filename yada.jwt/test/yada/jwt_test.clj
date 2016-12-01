@@ -37,10 +37,10 @@
                         :yada/profile (profiles :dev)})
           (new-request :post "http://localhost"))
 
-        cookie (first (get-in response [:headers "Set-Cookie"]))
+        ;;cookie (first (get-in response [:headers "Set-Cookie"]))
 
-        protected-response
-        @(accept-request
+        #_protected-response
+        #_@(accept-request
           (new-handler {:yada/resource
                         (new-resource
                          {:yada.resource/authentication {:yada.resource.authentication/scheme :jwt
@@ -62,4 +62,6 @@
           (-> (new-request :get "http://localhost")
               (assoc-in [:headers "cookie"] cookie)))]
 
-    protected-response))
+    response
+    #_protected-response
+    ))

@@ -23,7 +23,7 @@
 
   Response
   (handle-result [response ctx]
-    (assoc ctx :yada/response (merge {:ring.response/status 200} response)))
+    (assoc ctx :yada/response (merge {:yada.response/status 200} response)))
 
   Object
   (handle-result [o ctx]
@@ -33,7 +33,7 @@
 
   nil
   (handle-result [_ ctx]
-    (d/error-deferred (ex-info "" {:ring.response/status 404})))
+    (d/error-deferred (ex-info "" {:yada.response/status 404})))
 
   ;; Trampoline behavior
   clojure.lang.Fn
@@ -45,7 +45,7 @@
         response-fn (:yada.resource/response method)]
 
     (cond
-      (nil? method) (d/error-deferred (ex-info "No matching method in resource" {:ring.response/status 405}))
+      (nil? method) (d/error-deferred (ex-info "No matching method in resource" {:yada.response/status 405}))
       (nil? response-fn) (profile/nil-response-fn ctx)
       :otherwise
       (d/chain

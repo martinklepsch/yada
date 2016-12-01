@@ -47,7 +47,7 @@
 (defn status [error]
   (let [exception (:yada.error/exception error)
         error-data (when (instance? clojure.lang.ExceptionInfo exception) (ex-data exception))]
-    (or (:ring.response/status error-data) 500)))
+    (or (:yada.response/status error-data) 500)))
 
 (defn ^:interceptor handle-error
   "Render the error according to any negotiated content type"

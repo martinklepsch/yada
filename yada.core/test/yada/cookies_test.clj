@@ -16,6 +16,25 @@
   ;; TODO: property based test
   (is (map? (cookies/->headers (gen/generate (s/gen :yada.response/cookies))))))
 
+(let [res (new-resource
+             {:yada.resource/methods
+              {"GET" {:yada.resource/response
+                      (fn [ctx]
+                        (-> (ctx/response ctx)
+                            (cookies/set-cookie ctx "foo" {:yada.cookie/value "bar"})
+                            (ctx/set-body "Hello World!")))}}})
+
+        h (new-handler {:yada/resource res
+                        :yada.handler/interceptor-chain [perform-method]
+                        :yada/profile (profiles :dev)})
+
+        req (-> (new-request :get "https://localhost")
+                (assoc-in [:headers "cookie"] "SID=31d4d96e407aad42"))
+
+        response @(accept-request h (new-request :get "https://localhost"))]
+  response
+  )
+
 (deftest set-cookie-test
   (let [res (new-resource
              {:yada.resource/methods

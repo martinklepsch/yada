@@ -11,13 +11,12 @@
 
 (deftest authentication []
   (let [res (new-resource {:yada.resource/authentication
-                           [{:yada.resource/scheme "Test"
+                           [{:yada.resource.authentication/scheme "Test"
                              :yada.resource/realm "default"
                              :yada.resource/authenticate (fn [ctx] ctx)}]
                            :yada.resource/methods {"GET" {:yada.resource/response (fn [ctx] "Hi")}}})
         ctx (a/authenticate {:yada/resource res})]
-    (is (= [{:yada.authentication/claims {:credentials {:username "alice"},
-                                          }
-             :yada.request/scheme "Test",
+    (is (= [{:yada.authentication/claims {:credentials {:username "alice"}}
+             :yada.request/scheme "Test"
              :yada.request/realm "default"}]
            (ctx/authentication ctx)))))

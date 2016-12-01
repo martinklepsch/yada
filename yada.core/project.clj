@@ -12,7 +12,7 @@
    [potemkin "0.4.3"]
    [ring-spec "0.0.2"]]
 
-;;  :pedantic? :abort
+  ;;  :pedantic? :abort
 
   :global-vars {*warn-on-reflection* true}
 
@@ -24,15 +24,19 @@
                     "-server"
                     "-Dio.netty.leakDetectionLevel=paranoid"]
 
-;;         :pedantic? :abort
+         ;;         :pedantic? :abort
 
          :dependencies
          [[org.clojure/clojure "1.9.0-alpha14"]
 
-          [ch.qos.logback/logback-classic "1.1.5"
-           :exclusions [org.slf4j/slf4j-api]]
+
           [org.slf4j/jul-to-slf4j "1.7.18"]
           [org.slf4j/jcl-over-slf4j "1.7.18"]
           [org.slf4j/log4j-over-slf4j "1.7.18"]
 
-          [aleph "0.4.2-alpha8"]]}})
+          [aleph "0.4.2-alpha8"]]}
+
+   :repl {:dependencies [[ch.qos.logback/logback-classic "1.1.5" :exclusions [org.slf4j/slf4j-api]]]}
+
+   :test {:dependencies ^:replace [[org.clojure/clojure "1.9.0-alpha14"]
+                                    [org.slf4j/slf4j-nop "1.7.21"]]}})

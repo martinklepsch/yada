@@ -26,7 +26,6 @@
           :opt [:yada.handler/error-interceptor-chain]))
 
 (defn ^:interceptor terminate [ctx]
-  (println "TERMINATING, ctx is " ctx)
   (->
    (response/->ring-response (ctx/response ctx))
    ;; TODO: For modularity, do this in another cookies interceptor
@@ -43,7 +42,6 @@
      (apply d/chain ctx (transform-interceptor-chain ctx (concat chain [terminate])))
      (d/catch Exception
          (fn [e]
-           (println "ERROR catching")
            (->
             (apply d/chain
                    (assoc-in ctx [:yada/response :yada/error :yada.error/exception] e)

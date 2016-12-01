@@ -1,6 +1,7 @@
 (ns yada.interceptor
   (:require [yada.spec :refer [validate]]
-            [yada.profile :as profile]))
+            [yada.profile :as profile]
+            [clojure.tools.logging :refer :all]))
 
 (defmulti transform-interceptor-chain ""
   (fn [ctx chain]
@@ -11,7 +12,6 @@
 
 (defn debug-interceptor-wrapper [i]
   (fn [ctx]
-    (println "HERE: i is " i ",ctx is " ctx)
     (validate ctx :yada/context (format "Context not valid on entering interceptor: %s" i))
     (i ctx)))
 

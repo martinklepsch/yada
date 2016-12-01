@@ -17,7 +17,7 @@
   (let [token (yada.context/method-token ctx)]
     (if-not (contains? (set (keys (methods http-method))) token)
       (d/error-deferred (ex-info (format "No defmethod defined for %s" token)
-                                 {:ring.response/status 501
+                                 {:yada.response/status 501
                                   :yada/method-token token}))
       ctx)))
 
