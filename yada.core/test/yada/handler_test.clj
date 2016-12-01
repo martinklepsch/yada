@@ -10,15 +10,6 @@
 
 (require 'yada.methods)
 
-(let [res (new-resource {:yada.resource/methods
-                           {"GET" {:yada.resource/response (fn [ctx] "Hello World!")}}})
-        h (new-handler {:yada/resource res
-                        :yada.handler/interceptor-chain [method/perform-method]
-                        :yada/profile (profiles :dev)})
-      response @(accept-request h (new-request :get "https://localhost"))]
-  response
-  )
-
 (deftest ok
   (let [res (new-resource {:yada.resource/methods
                            {"GET" {:yada.resource/response (fn [ctx] "Hello World!")}}})
@@ -33,16 +24,16 @@
   (let [res (new-resource {:yada.resource/methods {"PUT" {}}})
         h (new-handler {:yada/resource res
                         :yada.handler/interceptor-chain [method/perform-method]
-                        :yada/profile (profiles :dev)})
+                        :yada/profile (profiles :prod)})
         response @(accept-request h (new-request :get "https://localhost"))]
     (is (= 405 (:status response)))
-    (is (= "Method Not Allowed" (:body response)))))
+    (is (= "405 Method Not Allowed" (:body response)))))
 
 (deftest not-implemented
   (let [res (new-resource {:yada.resource/methods {"BREW" {}}})
         h (new-handler {:yada/resource res
                         :yada.handler/interceptor-chain [method/check-method-implemented]
-                        :yada/profile (profiles :dev)})
+                        :yada/profile (profiles :prod)})
         response @(accept-request h (new-request :brew "https://localhost"))]
     (is (= 501 (:status response)))
-    (is (= "Not Implemented" (:body response)))))
+    (is (= "501 Not Implemented" (:body response)))))

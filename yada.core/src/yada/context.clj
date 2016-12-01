@@ -1,6 +1,7 @@
 ;; Copyright © 2014-2016, JUXT LTD.
 
-(ns yada.context
+(ns ^{:doc "Functions that encapsulate knowledge of the yada request context structure. This layer of indirection allows the structure of the request context to evolve without continually breaking code that uses it."}
+    yada.context
   (:require
    [clojure.string :as str]
    [clojure.spec :as s]
@@ -10,33 +11,21 @@
    [ring.core.spec :as rs]
    [yada.spec :refer [validate]]
    yada.cookies
-   [yada.response :refer [new-response]]
+   [yada.response :as response]
    [ring.middleware.cookies :refer [cookies-request cookies-response]])
   (:import [yada.response Response]))
 
 (s/def :yada/request (s/keys :req []
                              :opt [:yada.request/authentication]))
 
-(defn ->ring-response [ctx]
-  (let [response (:yada/response ctx)]
-    (merge
-     {:status (or (:yada.response/status response) 500)
-      ;; TODO: Set-Cookies should be in an interceptor
-      :headers (merge (when-let [cookies (:yada.response/cookies response)]
-                        (yada.cookies/->headers cookies))
-                      (or (:yada.response/headers response) {}))}
-     (when-let [body (:yada.response/body response)]
-       {:body body})
-     )))
-
 (defn add-status [ctx status]
-  (assoc-in ctx [:yada/response :ring.response/status] status))
+  (assoc-in ctx [:yada/response :yada.response/status] status))
 
 (defn add-body [ctx body]
-  (assoc-in ctx [:yada/response :ring.response/body] body))
+  (assoc-in ctx [:yada/response :yada.response/body] body))
 
 (defn add-header [ctx n v]
-  (assoc-in ctx [:yada/response :ring.response/headers n] v))
+  (assoc-in ctx [:yada/response :yada.response/headers n] v))
 
 (s/def :yada/context
   (s/keys :req [:yada/resource
@@ -53,7 +42,7 @@
      (when req
        {:yada/method-token (-> req :request-method name str/upper-case)
         :yada/request {:yada.request/cookies* (delay (:cookies (cookies-request req)))}})
-     {:yada/response (new-response)}
+     {:yada/response (response/new-response)}
      init-ctx)))
 
 (defn method-token [ctx]

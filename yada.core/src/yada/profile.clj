@@ -10,14 +10,14 @@
 (s/def :yada.profile/nil-response-fn fn?)
 (s/def :yada.profile/validate-context? boolean?)
 (s/def :yada.profile/validate-set-cookie? boolean?)
-(s/def :yada.profile/interceptor-wrapper fn?)
+(s/def :yada.profile/interceptor-wrapper keyword?)
 (s/def :yada.profile/error-renderer keyword?)
 
 (s/def :yada/profile (s/keys :req [:yada.profile/nil-response-fn
                                    :yada.profile/error-renderer
                                    :yada.profile/validate-context?
-                                   :yada.profile/validate-set-cookie?]
-                             :opt [:yada.profile/interceptor-wrapper]))
+                                   :yada.profile/validate-set-cookie?
+                                   :yada.profile/interceptor-wrapper]))
 
 (defn nil-response-fn [ctx]
   (when-let [f (get-in ctx [:yada/profile :yada.profile/nil-response-fn])]

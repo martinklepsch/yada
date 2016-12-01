@@ -4,15 +4,11 @@
    [yada.context :as ctx]
    [manifold.deferred :as d]))
 
-(defn debug-interceptor-wrapper [i]
-  (fn [ctx]
-    (validate ctx :yada/context (format "Context not valid on entering interceptor: %s" i))
-    (i ctx)))
-
 ;; TODO: Would be better to avoid functions, copying the pattern in
 ;; yada.profile/error-renderer. This means that profiles can be fully
 ;; specified in config data. Functions can be replaced by defmultis
 ;; and keywords, retaining extensibility.
+;; TODO list: nil-response-fn
 
 (def profiles
   {:dev
@@ -23,7 +19,7 @@
                 {:ring.response/status 500})))
     :yada.profile/validate-context? true
     :yada.profile/validate-set-cookie? true
-    :yada.profile/interceptor-wrapper debug-interceptor-wrapper
+    :yada.profile/interceptor-wrapper :debug
     :yada.profile/error-renderer :full}
 
    :prod
@@ -33,4 +29,5 @@
        (ex-info "" {:ring.response/status 500})))
     :yada.profile/validate-context? false
     :yada.profile/validate-set-cookie? false
+    :yada.profile/interceptor-wrapper :none
     :yada.profile/error-renderer :minimal}})

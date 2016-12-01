@@ -19,3 +19,10 @@
 
 (defn new-response []
   (map->Response {:yada.response/headers {}}))
+
+(defn ->ring-response [response]
+  (merge
+   {:status (or (:yada.response/status response) 500)
+    :headers (or (:yada.response/headers response) {})}
+   (when-let [body (:yada.response/body response)]
+     {:body body})))

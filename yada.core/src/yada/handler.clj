@@ -7,8 +7,10 @@
             [yada.error :as error]
             [yada.method :refer [perform-method]]
             [yada.context :as ctx]
+            [yada.response :as response]
             [yada.spec :refer [validate]]
             [yada.status :refer [status]]
+            [yada.interceptor :refer [transform-interceptor-chain]]
             [yada.profile :as profile]))
 
 (s/def :yada.handler/interceptor
@@ -24,10 +26,11 @@
           :opt [:yada.handler/error-interceptor-chain]))
 
 (defn ^:interceptor terminate [ctx]
-  (ctx/->ring-response ctx))
-
-(defn wrap-interceptors [chain wrapper]
-  (if wrapper (map wrapper chain) chain))
+  (println "TERMINATING, ctx is " ctx)
+  (->
+   (response/->ring-response (ctx/response ctx))
+   ;; TODO: For modularity, do this in another cookies interceptor
+   (update :headers merge (some-> (:yada.response/cookies (ctx/response ctx)) yada.cookies/->headers))))
 
 (defn apply-interceptors [ctx]
   ;; Have to validate the ctx here, it's the last chance.
@@ -37,9 +40,10 @@
 
   (let [chain (:yada.handler/interceptor-chain ctx)]
     (->
-     (apply d/chain ctx (wrap-interceptors (concat chain [terminate]) (profile/interceptor-wrapper ctx)))
+     (apply d/chain ctx (transform-interceptor-chain ctx (concat chain [terminate])))
      (d/catch Exception
          (fn [e]
+           (println "ERROR catching")
            (->
             (apply d/chain
                    (assoc-in ctx [:yada/response :yada/error :yada.error/exception] e)
